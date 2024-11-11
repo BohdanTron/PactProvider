@@ -1,0 +1,62 @@
+name: Provider Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+
+env:
+  PACT_BROKER_BASE_URL: ${{ secrets.PACTFLOW_BASE_URL }}
+  PACT_BROKER_TOKEN: ${{ secrets.PACTFLOW_TOKEN }}
+  PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
+  GIT_COMMIT: ${{ github.sha }}
+  BRANCH_NAME: ${{ github.ref_name }}
+  BUILD_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    # Run provider tests
+    - name: Run Provider tests
+      run: dotnet test ./Provider.Contract.Tests/Provider.Contract.Tests.csproj --no-build --configuration Release --verbosity normal 
+
+    - name: Can I Deploy (Provider) ?
+      run: |
+        docker run --rm \
+          pactfoundation/pact-cli:latest \
+          broker can-i-deploy \
+          --pacticipant StudentApi \
+          --version $GIT_COMMIT \
+          --to-environment stage \
+          --broker-base-url $PACT_BROKER_BASE_URL \
+          --broker-token $PACT_BROKER_TOKEN
+
+    - name: Record Provider Deployment in Stage
+      run: |
+        docker run --rm \
+          pactfoundation/pact-cli:latest \
+          broker record-deployment \
+          --pacticipant StudentApi \
+          --version $GIT_COMMIT \
+          --environment stage \
+          --broker-base-url $PACT_BROKER_BASE_URL \
+          --broker-token $PACT_BROKER_TOKEN
+  
