@@ -19,6 +19,7 @@ namespace Provider.Contract.Tests.Middlewares
             _providerStates = new Dictionary<string, Action>
             {
                 { "student with id 10 exists", Student10Exists },
+                { "no student with id 11 exists", NoStudent11Exists },
                 { "no auth token is provided", Student10Exists }
             };
         }
@@ -51,7 +52,6 @@ namespace Provider.Contract.Tests.Middlewares
             }
         }
 
-
         private void Student10Exists()
         {
             var student = new Student
@@ -64,6 +64,10 @@ namespace Provider.Contract.Tests.Middlewares
             };
 
             _repository.Add(student);
+        }
+
+        private static void NoStudent11Exists()
+        {
         }
     }
 }
