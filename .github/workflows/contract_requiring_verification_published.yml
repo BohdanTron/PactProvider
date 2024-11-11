@@ -1,0 +1,51 @@
+name: contract_requiring_verification_published
+
+# This workflow leverages the https://docs.pact.io/pact_broker/webhooks#the-contract-requiring-verification-published-event webhook
+
+on:
+  repository_dispatch:
+    types:
+      - contract_requiring_verification_published
+  workflow_dispatch:
+    # inputs aren't available on push, so we set them explicitly in separate steps
+    inputs:
+      PACT_URL:
+        description: URL of pact to verify
+        required: true
+
+env:
+  PACT_BROKER_BASE_URL: ${{ secrets.PACTFLOW_BASE_URL }}
+  PACT_BROKER_TOKEN: ${{ secrets.PACTFLOW_TOKEN }}
+  PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
+  PACT_URL: ${{ github.event.client_payload.pact_url }}
+  GIT_COMMIT: ${{ github.event.client_payload.sha }}
+  GIT_BRANCH: ${{ github.event.client_payload.branch }}
+  DESCRIPTION: ${{ github.event.client_payload.message }}
+
+jobs:
+  verify-contract-requiring-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch if user manually provides pact URL
+        uses: actions/checkout@v4
+        if: ${{ github.event.inputs.PACT_URL }}
+        
+      - name: Checkout specific SHA if webhook providers pact URL
+        uses: actions/checkout@v4
+        if: ${{ github.event.client_payload.pact_url }}
+        with:
+          ref: ${{env.GIT_COMMIT}}
+          
+      - name: Setup .NET SDK 8.0.x
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+  
+      - name: Run Provider tests
+        run: dotnet test ./Provider.Contract.Tests/Provider.Contract.Tests.csproj --no-build --configuration Release --verbosity normal 
