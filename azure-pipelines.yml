@@ -1,0 +1,68 @@
+
+trigger:
+  branches:
+    include:
+      - master
+
+pr:
+  branches:
+    include:
+      - master
+
+variables:
+  PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
+  PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
+  PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
+  GIT_COMMIT: $(Build.SourceVersion)
+  BRANCH_NAME: $(Build.SourceBranchName)
+  BUILD_URL: "https://dev.azure.com/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.x'
+  displayName: 'Setup .NET'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+  displayName: 'Restore dependencies'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    arguments: '--configuration Release'
+  displayName: 'Build Project'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
+    arguments: '--no-build --configuration Release --verbosity normal'
+  displayName: 'Run Provider Tests'
+
+- script: |
+    docker run --rm \
+      pactfoundation/pact-cli:latest \
+      broker can-i-deploy \
+      --pacticipant StudentApi \
+      --version $(GIT_COMMIT) \
+      --to-environment stage \
+      --broker-base-url $(PACT_BROKER_BASE_URL) \
+      --broker-token $(PACT_BROKER_TOKEN)
+  displayName: 'Can I Deploy (Provider)?'
+
+- script: |
+    docker run --rm \
+      pactfoundation/pact-cli:latest \
+      broker record-deployment \
+      --pacticipant StudentApi \
+      --version $(GIT_COMMIT) \
+      --environment stage \
+      --broker-base-url $(PACT_BROKER_BASE_URL) \
+      --broker-token $(PACT_BROKER_TOKEN)
+  displayName: 'Record Provider Deployment in Stage'
