@@ -21,6 +21,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+
+- script: printenv | grep 'PACT'
+  displayName: 'Print Pact Environment Variables'
+
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
