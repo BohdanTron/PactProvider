@@ -60,6 +60,8 @@ jobs:
     displayName: 'Build'
 
   - task: DotNetCoreCLI@2
+    env:
+      PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
     inputs:
       command: 'test'
       projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
