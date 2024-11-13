@@ -3,63 +3,82 @@ trigger:
     include:
       - master
 
-variables:
-  PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
-  PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
-  PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
-  GIT_COMMIT: $(Build.SourceVersion)
-  BRANCH_NAME: $(Build.SourceBranchName)
-  BUILD_URL: "https://dev.azure.com/tronbodya/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
-
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
+variables:
+  - group: PactFlowSettings
 
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '8.0.x'
-  displayName: 'Setup .NET'
+stages:
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'restore'
-  displayName: 'Restore dependencies'
+- stage: Build
+  displayName: 'Build and Run Tests'
+  jobs:
+  - job: Build
+    displayName: 'Build and Run Tests'
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '8.0.x'
+      displayName: 'Setup .NET'
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
-    arguments: '--configuration Release'
-  displayName: 'Build Project'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'restore'
+      displayName: 'Restore Dependencies'
 
-- task: DotNetCoreCLI@2
-  env:
-    PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
-  inputs:
-    command: 'test'
-    projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
-    arguments: '--no-build --configuration Release --verbosity normal'
-  displayName: 'Run Provider Tests'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'
+        arguments: '--configuration Release'
+      displayName: 'Build Project'
 
-- script: |
-    docker run --rm \
-      pactfoundation/pact-cli:latest \
-      broker can-i-deploy \
-      --pacticipant StudentApi \
-      --version $(GIT_COMMIT) \
-      --to-environment stage \
-      --broker-base-url $(PACT_BROKER_BASE_URL) \
-      --broker-token $(PACT_BROKER_TOKEN)
-  displayName: 'Can I Deploy (Provider)?'
+    - task: DotNetCoreCLI@2
+      env:
+        PACT_BROKER_TOKEN: $(PACT_BROKER_TOKEN)
+      inputs:
+        command: 'test'
+        projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
+        arguments: '--no-build --configuration Release --verbosity normal'
+      displayName: 'Run Tests'
 
-- script: |
-    docker run --rm \
-      pactfoundation/pact-cli:latest \
-      broker record-deployment \
-      --pacticipant StudentApi \
-      --version $(GIT_COMMIT) \
-      --environment stage \
-      --broker-base-url $(PACT_BROKER_BASE_URL) \
-      --broker-token $(PACT_BROKER_TOKEN)
-  displayName: 'Record Provider Deployment in Stage'
+- stage: CanIDeploy
+  displayName: 'Can I Deploy?'
+  dependsOn: BuildAndTest
+  jobs:
+  - job: CanIDeploy
+    displayName: 'Check Can I Deploy Status'
+    steps:
+    - script: |
+        docker run --rm \
+          pactfoundation/pact-cli:latest \
+          broker can-i-deploy \
+          --pacticipant StudentApi \
+          --version $(Build.SourceVersion) \
+          --to-environment stage \
+          --broker-base-url $(PACT_BROKER_BASE_URL) \
+          --broker-token $(PACT_BROKER_TOKEN)
+      displayName: 'Can I Deploy?'
+
+- stage: DeployAndRecordDeployment
+  displayName: 'Deploy and Record Deployment'
+  dependsOn: CanIDeploy
+  jobs:
+  - job: DeployAndRecord
+    displayName: 'Deploy and Record Deployment in PactFlow'
+    steps:
+    - script: |
+        echo "Deploying the application..."
+      displayName: 'Deploy Application'
+
+    - script: |
+        docker run --rm \
+          pactfoundation/pact-cli:latest \
+          broker record-deployment \
+          --pacticipant StudentApi \
+          --version $(Build.SourceVersion) \
+          --environment stage \
+          --broker-base-url $(PACT_BROKER_BASE_URL) \
+          --broker-token $(PACT_BROKER_TOKEN)
+      displayName: 'Record Deployment in PactFlow'
