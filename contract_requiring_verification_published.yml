@@ -9,30 +9,11 @@ resources:
     - webhook: VerifyPublishedContract
       connection: VerifyPublishedContractConnection
 
-# Define runtime parameters for PactFlow webhook data
-# parameters:
-#   - name: pact_url
-#     type: string
-#     default: ''
-#     displayName: 'Pact URL to verify'
-#   - name: sha
-#     type: string
-#     default: ''
-#     displayName: 'Specific commit SHA to checkout'
-#   - name: branch
-#     type: string
-#     default: 'refs/heads/master'
-#     displayName: 'Branch to Checkout'
-#   - name: message
-#     type: string
-#     default: ''
-#     displayName: 'Verification Message'
-
 variables:
   PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
   PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
   PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
-  BUILD_URL: "$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+  BUILD_URL: "https://dev.azure.com/tronbodya/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
 
 pool:
   vmImage: 'ubuntu-latest'
