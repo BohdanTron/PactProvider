@@ -3,11 +3,6 @@ trigger:
     include:
       - master
 
-pr:
-  branches:
-    include:
-      - master
-
 variables:
   PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
   PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
