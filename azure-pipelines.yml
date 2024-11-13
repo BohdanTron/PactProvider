@@ -14,7 +14,7 @@ variables:
   PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
   GIT_COMMIT: $(Build.SourceVersion)
   BRANCH_NAME: $(Build.SourceBranchName)
-  BUILD_URL: "https://dev.azure.com/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+  BUILD_URL: "$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
 
 pool:
   vmImage: 'ubuntu-latest'
