@@ -10,7 +10,7 @@ pr:
       - master
 
 variables:
-  PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
+  # PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
   PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
   PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
   GIT_COMMIT: $(Build.SourceVersion)
@@ -43,6 +43,8 @@ steps:
   displayName: 'Build Project'
 
 - task: DotNetCoreCLI@2
+  env:
+      PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
   inputs:
     command: 'test'
     projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
