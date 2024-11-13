@@ -1,6 +1,13 @@
 name: Contract Requiring Verification Published
 
-trigger: none  # Disable default trigger as it’s initiated by webhook
+# Disable default trigger as it’s initiated by webhook
+trigger: none
+pr: none
+
+resources:
+  webhooks:
+    - webhook: VerifyPublishedContract
+      connection: VerifyPublishedContractConnection
 
 # Define runtime parameters for PactFlow webhook data
 parameters:
