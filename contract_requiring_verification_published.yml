@@ -39,7 +39,7 @@ jobs:
   - script: echo "Verifying pact from ${{ parameters.pact_url }} - ${{ parameters.message }}"
     displayName: 'Verify Pact Message'
 
-  - checkout: "git://PactLearning/PactProvider@refs/heads/${{ parameters.branch }}"
+  - checkout: "git://BohdanTron/PactProvider@refs/heads/${{ parameters.branch }}"
 
   - task: UseDotNet@2
     inputs:
