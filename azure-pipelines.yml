@@ -45,7 +45,7 @@ stages:
 
 - stage: CanIDeploy
   displayName: 'Can I Deploy?'
-  dependsOn: BuildAndTest
+  dependsOn: Build
   jobs:
   - job: CanIDeploy
     displayName: 'Check Can I Deploy Status'
