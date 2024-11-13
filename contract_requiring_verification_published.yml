@@ -10,23 +10,23 @@ resources:
       connection: VerifyPublishedContractConnection
 
 # Define runtime parameters for PactFlow webhook data
-parameters:
-  - name: pact_url
-    type: string
-    default: ''
-    displayName: 'Pact URL to verify'
-  - name: sha
-    type: string
-    default: ''
-    displayName: 'Specific commit SHA to checkout'
-  - name: branch
-    type: string
-    default: 'refs/heads/master'
-    displayName: 'Branch to Checkout'
-  - name: message
-    type: string
-    default: ''
-    displayName: 'Verification Message'
+# parameters:
+#   - name: pact_url
+#     type: string
+#     default: ''
+#     displayName: 'Pact URL to verify'
+#   - name: sha
+#     type: string
+#     default: ''
+#     displayName: 'Specific commit SHA to checkout'
+#   - name: branch
+#     type: string
+#     default: 'refs/heads/master'
+#     displayName: 'Branch to Checkout'
+#   - name: message
+#     type: string
+#     default: ''
+#     displayName: 'Verification Message'
 
 variables:
   PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
@@ -43,7 +43,7 @@ jobs:
 
   steps:
 
-  - script: echo "Verifying pact from ${{ parameters.pact_url }} - ${{ parameters.message }}"
+  - script: echo "Verifying pact from ${{ parameters.VerifyPublishedContract.client_payload.pact_url }} - ${{ parameters.VerifyPublishedContract.client_payload.message }}"
     displayName: 'Verify Pact Message'
 
   # TODO: checkout provided branch
