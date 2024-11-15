@@ -1,0 +1,17 @@
+parameters:
+  - name: pacticipant
+    type: string
+  - name: environment
+    type: string
+
+steps:
+  - script: |
+      docker run --rm \
+        pactfoundation/pact-cli:latest \
+        broker record-deployment \
+        --pacticipant ${{ parameters.pacticipant }} \
+        --version $(Build.SourceVersion) \
+        --environment ${{ parameters.environment }} \
+        --broker-base-url $(PACT_BROKER_BASE_URL) \
+        --broker-token $(PACT_BROKER_TOKEN)
+    displayName: 'Record Deployment in PactFlow'

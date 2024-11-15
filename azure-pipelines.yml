@@ -59,13 +59,7 @@ stages:
         echo "Deploying the application..."
       displayName: 'Deploy Application'
 
-    - script: |
-        docker run --rm \
-          pactfoundation/pact-cli:latest \
-          broker record-deployment \
-          --pacticipant StudentApi \
-          --version $(Build.SourceVersion) \
-          --environment stage \
-          --broker-base-url $(PACT_BROKER_BASE_URL) \
-          --broker-token $(PACT_BROKER_TOKEN)
-      displayName: 'Record Deployment in PactFlow'
+    - template: record-deployment-template.yml
+      parameters:
+        pacticipant: 'StudentApiClient'
+        environment: 'stage'
