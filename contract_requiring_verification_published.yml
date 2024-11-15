@@ -10,48 +10,46 @@ resources:
       connection: VerifyPublishedContractConnection
 
 variables:
-  PACT_BROKER_BASE_URL: $(PACTFLOW_BASE_URL)
-  PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
-  PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
-  BUILD_URL: "https://dev.azure.com/tronbodya/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+  - group: PactFlowSettings
 
 pool:
   vmImage: 'ubuntu-latest'
 
-jobs:
-- job: ContractRequiringVerificationPublished
-  displayName: "Contract Requiring Verification Published"
+stages:
+  - stage: ContractRequiringVerificationPublished
+    displayName: "Contract Requiring Verification Published"
+    jobs:
+    - job: ContractRequiringVerificationPublished
+      displayName: "Contract Requiring Verification Published"
+      steps:
+      
+      - script: echo "Verifying pact from ${{ parameters.VerifyPublishedContract.client_payload.pact_url }} - ${{ parameters.VerifyPublishedContract.client_payload.message }}"
+        displayName: 'Verify Pact Message'
 
-  steps:
+      - task: UseDotNet@2
+        inputs:
+          packageType: 'sdk'
+          version: '8.0.x'
+        displayName: 'Setup .NET SDK 8.0.x'
 
-  - script: echo "Verifying pact from ${{ parameters.VerifyPublishedContract.client_payload.pact_url }} - ${{ parameters.VerifyPublishedContract.client_payload.message }}"
-    displayName: 'Verify Pact Message'
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'restore'
+        displayName: 'Restore dependencies'
 
-  # TODO: checkout provided branch
-  # - checkout: "git://BohdanTron/PactProvider@refs/heads/${{ parameters.branch }}"
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'build'
+          arguments: '--configuration Release'
+        displayName: 'Build'
 
-  - task: UseDotNet@2
-    inputs:
-      packageType: 'sdk'
-      version: '8.0.x'
-    displayName: 'Setup .NET SDK 8.0.x'
-
-  - task: DotNetCoreCLI@2
-    inputs:
-      command: 'restore'
-    displayName: 'Restore dependencies'
-
-  - task: DotNetCoreCLI@2
-    inputs:
-      command: 'build'
-      arguments: '--configuration Release'
-    displayName: 'Build'
-
-  - task: DotNetCoreCLI@2
-    env:
-      PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
-    inputs:
-      command: 'test'
-      projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
-      arguments: '--no-build --configuration Release --verbosity normal'
-    displayName: 'Run Provider Tests'
+      - task: DotNetCoreCLI@2
+        env:
+          PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
+          PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
+          BUILD_URL: "https://dev.azure.com/tronbodya/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+        inputs:
+          command: 'test'
+          projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
+          arguments: '--no-build --configuration Release --verbosity normal'
+        displayName: 'Run Provider Tests'
