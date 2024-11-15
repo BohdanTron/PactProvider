@@ -45,7 +45,7 @@ stages:
 
       - task: DotNetCoreCLI@2
         env:
-          PACT_BROKER_TOKEN: $(PACTFLOW_TOKEN)
+          PACT_BROKER_TOKEN: $(PACT_BROKER_TOKEN)
           PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT: true
           BUILD_URL: "https://dev.azure.com/tronbodya/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
           GIT_COMMIT: $(Build.SourceVersion)
