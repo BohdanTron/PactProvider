@@ -7,7 +7,6 @@ parameters:
 stages:
 - stage: CanIDeploy
   displayName: 'Can I Deploy?'
-  dependsOn: PublishContractTests
   jobs:
   - job: CanIDeploy
     displayName: 'Check Can I Deploy Status'
