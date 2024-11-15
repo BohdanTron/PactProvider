@@ -61,5 +61,5 @@ stages:
 
     - template: record-deployment-template.yml
       parameters:
-        pacticipant: 'StudentApiClient'
+        pacticipant: 'StudentApi'
         environment: 'stage'
