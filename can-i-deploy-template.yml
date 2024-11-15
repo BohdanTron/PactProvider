@@ -24,4 +24,4 @@ stages:
           --broker-token $(PACT_BROKER_TOKEN) \
           --retry-while-unknown 5 \
           --retry-interval 10
-      displayName: 'Can I Deploy (Consumer)'
+      displayName: 'Can I Deploy'
