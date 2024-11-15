@@ -43,23 +43,10 @@ stages:
         arguments: '--no-build --configuration Release --verbosity normal'
       displayName: 'Run Tests'
 
-- stage: CanIDeploy
-  displayName: 'Can I Deploy?'
-  dependsOn: Build
-  jobs:
-  - job: CanIDeploy
-    displayName: 'Check Can I Deploy Status'
-    steps:
-    - script: |
-        docker run --rm \
-          pactfoundation/pact-cli:latest \
-          broker can-i-deploy \
-          --pacticipant StudentApi \
-          --version $(Build.SourceVersion) \
-          --to-environment stage \
-          --broker-base-url $(PACT_BROKER_BASE_URL) \
-          --broker-token $(PACT_BROKER_TOKEN)
-      displayName: 'Can I Deploy?'
+- template: can-i-deploy-template.yml
+  parameters:
+    pacticipant: 'StudentApi'
+    environment: 'stage'
 
 - stage: DeployAndRecordDeployment
   displayName: 'Deploy and Record Deployment'

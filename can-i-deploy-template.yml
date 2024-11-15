@@ -1,0 +1,28 @@
+parameters:
+  - name: pacticipant
+    type: string
+  - name: environment
+    type: string
+
+stages:
+- stage: CanIDeploy
+  displayName: 'Can I Deploy?'
+  dependsOn: PublishContractTests
+  jobs:
+  - job: CanIDeploy
+    displayName: 'Check Can I Deploy Status'
+    variables:
+      - group: PactFlowSettings
+    steps:
+    - script: |
+        docker run --rm \
+          pactfoundation/pact-cli:latest \
+          broker can-i-deploy \
+          --pacticipant ${{ parameters.pacticipant }} \
+          --version $(Build.SourceVersion) \
+          --to-environment ${{ parameters.environment }} \
+          --broker-base-url $(PACT_BROKER_BASE_URL) \
+          --broker-token $(PACT_BROKER_TOKEN) \
+          --retry-while-unknown 5 \
+          --retry-interval 10
+      displayName: 'Can I Deploy (Consumer)'
