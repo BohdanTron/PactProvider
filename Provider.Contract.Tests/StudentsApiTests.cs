@@ -65,14 +65,14 @@ namespace Provider.Contract.Tests
                             new ConsumerVersionSelector { MainBranch = true },
                             new ConsumerVersionSelector { MatchingBranch = true },
                             new ConsumerVersionSelector { DeployedOrReleased = true }
-                        ).ProviderBranch(branch);
-
-                    options.TokenAuthentication(pactBrokerToken);
-                    options.PublishResults(shouldPublishResults, version, publishOptions =>
-                    {
-                        publishOptions.ProviderBranch(branch)
-                            .BuildUri(new Uri(buildUri));
-                    });
+                        )
+                        .ProviderBranch(branch)
+                        .PublishResults(shouldPublishResults, version, publishOptions =>
+                        {
+                            publishOptions.ProviderBranch(branch)
+                                .BuildUri(new Uri(buildUri));
+                        })
+                        .TokenAuthentication(pactBrokerToken);
                 })
                 .WithProviderStateUrl(new Uri(_fixture.ServerUri, "/provider-states"))
                 .Verify();
