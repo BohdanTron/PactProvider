@@ -62,17 +62,16 @@ namespace Provider.Contract.Tests
                 .WithPactBrokerSource(new Uri(pactBrokerUrl), options =>
                 {
                     options.ConsumerVersionSelectors(
-                        new ConsumerVersionSelector { MainBranch = true },
-                        new ConsumerVersionSelector { MatchingBranch = true },
-                        new ConsumerVersionSelector { DeployedOrReleased = true });
-
-                    options.ProviderBranch(branch);
+                            new ConsumerVersionSelector { MainBranch = true },
+                            new ConsumerVersionSelector { MatchingBranch = true },
+                            new ConsumerVersionSelector { DeployedOrReleased = true }
+                        ).ProviderBranch(branch);
 
                     options.TokenAuthentication(pactBrokerToken);
                     options.PublishResults(shouldPublishResults, version, publishOptions =>
                     {
-                        publishOptions.ProviderBranch(branch);
-                        publishOptions.BuildUri(new Uri(buildUri));
+                        publishOptions.ProviderBranch(branch)
+                            .BuildUri(new Uri(buildUri));
                     });
                 })
                 .WithProviderStateUrl(new Uri(_fixture.ServerUri, "/provider-states"))
