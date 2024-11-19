@@ -66,6 +66,8 @@ namespace Provider.Contract.Tests
                         new ConsumerVersionSelector { MatchingBranch = true },
                         new ConsumerVersionSelector { DeployedOrReleased = true });
 
+                    options.ProviderBranch(branch);
+
                     options.TokenAuthentication(pactBrokerToken);
                     options.PublishResults(shouldPublishResults, version, publishOptions =>
                     {
