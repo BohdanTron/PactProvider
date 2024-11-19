@@ -61,6 +61,11 @@ namespace Provider.Contract.Tests
                 }, Options)
                 .WithPactBrokerSource(new Uri(pactBrokerUrl), options =>
                 {
+                    options.ConsumerVersionSelectors(
+                        new ConsumerVersionSelector { MainBranch = true },
+                        new ConsumerVersionSelector { MatchingBranch = true },
+                        new ConsumerVersionSelector { DeployedOrReleased = true });
+
                     options.TokenAuthentication(pactBrokerToken);
                     options.PublishResults(shouldPublishResults, version, publishOptions =>
                     {
