@@ -14,6 +14,8 @@ namespace Provider.Contract.Tests
 
         public async Task InitializeAsync()
         {
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+
             var builder = WebApplication.CreateBuilder()
                 .ConfigureServices();
 

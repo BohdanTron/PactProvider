@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Azure;
@@ -60,31 +61,38 @@ namespace Provider
                     "my_event_hub");
             });
 
-            builder.Services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    // Generate token here http://jwtbuilder.jamiekurtz.com/
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Services.AddAuthentication("Fake")
+                    .AddScheme<AuthenticationSchemeOptions, FakeAuthenticationHandler>("Fake", options => { });
+            }
+            else
+            {
+                builder.Services
+                    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        // Generate token here http://jwtbuilder.jamiekurtz.com/
 
-                    options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters.ValidateIssuer = false;
-                    options.TokenValidationParameters.ValidateAudience = false;
-                    options.TokenValidationParameters.ValidateIssuerSigningKey = false;
-                    options.TokenValidationParameters.ValidateLifetime = false;
+                        options.RequireHttpsMetadata = false;
+                        options.TokenValidationParameters.ValidateIssuer = false;
+                        options.TokenValidationParameters.ValidateAudience = false;
+                        options.TokenValidationParameters.ValidateIssuerSigningKey = false;
+                        options.TokenValidationParameters.ValidateLifetime = false;
 
-                    options.TokenValidationParameters.IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qwertyuiopasdfghjklzxcvbnm123456"));
+                        options.TokenValidationParameters.IssuerSigningKey =
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qwertyuiopasdfghjklzxcvbnm123456"));
 
-                    options.MapInboundClaims = false;
-                    options.TokenValidationParameters.NameClaimType = "name";
-                    options.TokenValidationParameters.RoleClaimType = "role";
-                });
+                        options.MapInboundClaims = false;
+                        options.TokenValidationParameters.NameClaimType = "name";
+                        options.TokenValidationParameters.RoleClaimType = "role";
+                    });
+            }
 
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("RegisteredUser", policy => policy.RequireClaim("sub"));
             });
-
 
             return builder;
         }
