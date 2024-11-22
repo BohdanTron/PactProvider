@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Azure.Messaging.EventHubs;
 using Azure.Messaging.EventHubs.Producer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Provider.Controllers
@@ -16,14 +17,15 @@ namespace Provider.Controllers
 
         public StudentsController(
             IStudentRepository studentRepository,
-            IEventPublisher eventPublisher,
+            //IEventPublisher eventPublisher,
             EventHubProducerClient producerClient)
         {
             _studentRepository = studentRepository;
-            _eventPublisher = eventPublisher;
+            //_eventPublisher = eventPublisher;
             _producerClient = producerClient;
         }
 
+        [Authorize(Policy = "RegisteredUser")]
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {

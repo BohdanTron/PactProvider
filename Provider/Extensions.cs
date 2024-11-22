@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.ApplicationParts;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Azure;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Provider.Controllers;
 using Provider.Middlewares;
@@ -57,6 +60,32 @@ namespace Provider
                     "my_event_hub");
             });
 
+            builder.Services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    // Generate token here http://jwtbuilder.jamiekurtz.com/
+
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters.ValidateIssuer = false;
+                    options.TokenValidationParameters.ValidateAudience = false;
+                    options.TokenValidationParameters.ValidateIssuerSigningKey = false;
+                    options.TokenValidationParameters.ValidateLifetime = false;
+
+                    options.TokenValidationParameters.IssuerSigningKey =
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qwertyuiopasdfghjklzxcvbnm123456"));
+
+                    options.MapInboundClaims = false;
+                    options.TokenValidationParameters.NameClaimType = "name";
+                    options.TokenValidationParameters.RoleClaimType = "role";
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RegisteredUser", policy => policy.RequireClaim("sub"));
+            });
+
+
             return builder;
         }
 
@@ -70,7 +99,7 @@ namespace Provider
 
             app.UseHttpsRedirection();
 
-            app.UseMiddleware<AuthorizationMiddleware>();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
