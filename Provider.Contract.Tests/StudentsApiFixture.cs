@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Provider.Contract.Tests.Fakes;
 using Provider.Contract.Tests.Middlewares;
@@ -12,12 +13,22 @@ namespace Provider.Contract.Tests
 
         public Uri ServerUri { get; } = new("http://localhost:9001");
 
+        private readonly IConfiguration Configuration
+            = new ConfigurationBuilder()
+                .AddJsonFile("appsettings-Tests.json")
+                .Build();
+
         public async Task InitializeAsync()
         {
-            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+            //Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 
-            var builder = WebApplication.CreateBuilder()
-                .ConfigureServices();
+            var builder = WebApplication.CreateBuilder();
+
+            builder.Environment.EnvironmentName = "Development";
+
+            builder.Configuration.AddConfiguration(Configuration);
+                
+            builder.ConfigureServices();
 
             builder.WebHost.UseUrls(ServerUri.ToString());
 
