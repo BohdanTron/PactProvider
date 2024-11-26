@@ -12,6 +12,10 @@ resources:
 variables:
   - group: PactFlowSettings
 
+  - name: consumerBranch
+    value: ${{ parameters.VerifyPublishedContract.client_payload.consumer_branch }}
+
+
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -22,9 +26,16 @@ stages:
     - job: ContractRequiringVerificationPublished
       displayName: "Contract Requiring Verification Published"
       steps:
-      
-      - script: echo "Verifying pact from ${{ parameters.VerifyPublishedContract.client_payload.pact_url }} - ${{ parameters.VerifyPublishedContract.client_payload.message }}"
-        displayName: 'Verify Pact Message'
+
+      - checkout: self
+        displayName: 'Checkout Repo'
+        fetchDepth: 1
+        path: s
+
+      - script: |
+          git fetch --no-tags --depth=1 origin +refs/heads/$(consumerBranch):refs/remotes/origin/$(consumerBranch)
+          git checkout $(consumerBranch) || git checkout master
+        displayName: 'Ensure branch and fallback to master'
 
       - task: UseDotNet@2
         inputs:
