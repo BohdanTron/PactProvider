@@ -48,7 +48,7 @@ namespace Provider.Contract.Tests
             var shouldPublishResults = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT"));
             var version = Environment.GetEnvironmentVariable("GIT_COMMIT") ?? "local";
             var branch = Environment.GetEnvironmentVariable("BRANCH_NAME") ?? "master";
-            var buildUri = Environment.GetEnvironmentVariable("BUILD_URL") ?? "master";
+            var buildUri = Environment.GetEnvironmentVariable("BUILD_URL");
 
             var consumerBranch = Environment.GetEnvironmentVariable("CONSUMER_BRANCH") ?? "master";
 
@@ -72,8 +72,10 @@ namespace Provider.Contract.Tests
                         .ProviderBranch(branch)
                         .PublishResults(shouldPublishResults, version, publishOptions =>
                         {
-                            publishOptions.ProviderBranch(branch)
-                                .BuildUri(new Uri(buildUri));
+                            publishOptions.ProviderBranch(branch);
+
+                            if (!string.IsNullOrEmpty(buildUri))
+                                publishOptions.BuildUri(new Uri(buildUri));
                         })
                         .TokenAuthentication(pactBrokerToken);
                 })
