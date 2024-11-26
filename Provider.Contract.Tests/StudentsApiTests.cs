@@ -46,9 +46,11 @@ namespace Provider.Contract.Tests
             var pactBrokerToken = configuration["PactBroker:Token"] ?? Environment.GetEnvironmentVariable("PACT_BROKER_TOKEN");
 
             var shouldPublishResults = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PACT_BROKER_PUBLISH_VERIFICATIONS_RESULT"));
-            var version = Environment.GetEnvironmentVariable("GIT_COMMIT");
+            var version = Environment.GetEnvironmentVariable("GIT_COMMIT") ?? "local";
             var branch = Environment.GetEnvironmentVariable("BRANCH_NAME") ?? "master";
-            var buildUri = Environment.GetEnvironmentVariable("BUILD_URL");
+            var buildUri = Environment.GetEnvironmentVariable("BUILD_URL") ?? "master";
+
+            var consumerBranch = Environment.GetEnvironmentVariable("CONSUMER_BRANCH") ?? "master";
 
             // Act / Assert
             var pactVerifier = new PactVerifier("StudentApi", pactConfig);
@@ -64,7 +66,8 @@ namespace Provider.Contract.Tests
                     options.ConsumerVersionSelectors(
                             new ConsumerVersionSelector { MainBranch = true },
                             new ConsumerVersionSelector { MatchingBranch = true },
-                            new ConsumerVersionSelector { DeployedOrReleased = true }
+                            new ConsumerVersionSelector { DeployedOrReleased = true },
+                            new ConsumerVersionSelector { Branch = consumerBranch }
                         )
                         .ProviderBranch(branch)
                         .PublishResults(shouldPublishResults, version, publishOptions =>
