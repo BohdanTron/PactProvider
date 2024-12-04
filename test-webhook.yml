@@ -59,7 +59,7 @@ stages:
           BUILD_URL: "https://dev.azure.com/tronbodya/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
           GIT_COMMIT: $(Build.SourceVersion)
           BRANCH_NAME: $(Build.SourceBranchName)
-          CONSUMER_BRANCH: ${{ parameters.VerifyPublishedContract.client_payload.consumer_branch }}
+          CONSUMER_BRANCH: ${{ parameters.TestHook.client_payload.consumer_branch }}
         inputs:
           command: 'test'
           projects: 'Provider.Contract.Tests/Provider.Contract.Tests.csproj'
