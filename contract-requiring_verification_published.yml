@@ -22,7 +22,7 @@ resources:
       connection: VerifyPublishedContractConnection
 
   repositories:
-    - repository: self 
+    - repository: myrepo 
       type: github
       name: BohdanTron/PactProvider
       ref: "refs/heads/test-hook"
@@ -38,7 +38,7 @@ stages:
       displayName: "Contract Requiring Verification Published"
       steps:
 
-      - checkout: self
+      - checkout: myrepo
       # - script: |
       #     echo "Fetching branch: $(providerBranch)"
       #     git fetch origin $(providerBranch)
