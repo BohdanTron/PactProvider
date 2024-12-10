@@ -38,7 +38,11 @@ stages:
       displayName: "Contract Requiring Verification Published"
       steps:
 
-      - checkout: self
+      - script: |
+          echo "Fetching branch: $(providerBranch)"
+          git fetch origin $(providerBranch)
+          git checkout $(providerBranch)
+        displayName: "Fetch and Checkout Provider Branch"
 
       - script: echo "The current Build.SourceBranchName is $(Build.SourceBranchName), the provider branch is $(providerBranch)"
         displayName: "Echo Build.SourceBranchName"
