@@ -40,8 +40,8 @@ stages:
 
       - checkout: self
 
-      - script: echo "The current Build.SourceVersion is $(Build.SourceVersion)"
-        displayName: "Echo Build.SourceVersion"
+      - script: echo "The current Build.SourceBranchName is $(Build.SourceBranchName), the provider branch is $(providerBranch)"
+        displayName: "Echo Build.SourceBranchName"
 
       - task: UseDotNet@2
         inputs:
