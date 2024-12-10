@@ -25,7 +25,7 @@ resources:
     - repository: self 
       type: github
       name: BohdanTron/PactProvider
-      ref: "refs/heads/$(providerBranch)"
+      ref: "refs/heads/test-hook"
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -38,11 +38,12 @@ stages:
       displayName: "Contract Requiring Verification Published"
       steps:
 
-      - script: |
-          echo "Fetching branch: $(providerBranch)"
-          git fetch origin $(providerBranch)
-          git checkout $(providerBranch)
-        displayName: "Fetch and Checkout Provider Branch"
+      - checkout: self
+      # - script: |
+      #     echo "Fetching branch: $(providerBranch)"
+      #     git fetch origin $(providerBranch)
+      #     git checkout $(providerBranch)
+      #   displayName: "Fetch and Checkout Provider Branch"
 
       - script: echo "The current Build.SourceBranchName is $(Build.SourceBranchName), the provider branch is $(providerBranch)"
         displayName: "Echo Build.SourceBranchName"
