@@ -4,17 +4,28 @@ name: Contract Requiring Verification Published
 trigger: none
 pr: none
 
-resources:
-  webhooks:
-    - webhook: VerifyPublishedContract
-      connection: VerifyPublishedContractConnection
-
 variables:
   - group: PactFlowSettings
 
   - name: consumerBranch
     value: ${{ parameters.VerifyPublishedContract.client_payload.consumer_branch }}
 
+  - name: providerBranch
+    ${{ if parameters.VerifyPublishedContract.client_payload.provider_branch }}:
+      value: ${{ parameters.VerifyPublishedContract.client_payload.provider_branch }}
+    ${{ else }}:
+      value: 'test-hook' # Should be changed to 'master'
+
+resources:
+  webhooks:
+    - webhook: VerifyPublishedContract
+      connection: VerifyPublishedContractConnection
+
+  repositories:
+    - repository: self 
+      type: github
+      name: BohdanTron/PactProvider
+      ref: "refs/heads/$(providerBranch)"
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -28,14 +39,9 @@ stages:
       steps:
 
       - checkout: self
-        displayName: 'Checkout Repo'
-        fetchDepth: 1
-        path: s
 
-      - script: |
-          git fetch --no-tags --depth=1 origin +refs/heads/$(consumerBranch):refs/remotes/origin/$(consumerBranch)
-          git checkout $(consumerBranch) || git checkout master
-        displayName: 'Ensure branch and fallback to master'
+      - script: echo "The current Build.SourceVersion is $(Build.SourceVersion)"
+        displayName: "Echo Build.SourceVersion"
 
       - task: UseDotNet@2
         inputs:
